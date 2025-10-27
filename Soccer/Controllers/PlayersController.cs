@@ -17,7 +17,7 @@ namespace Soccer.Controllers
         // GET: Players
         public async Task<IActionResult> Index(int page = 1)
         {
-            int pageSize = 5;   // количество элементов на странице
+            int pageSize = 10;   // количество элементов на странице
 
             IQueryable<Players> players = _context.Players.Include(x => x.Team);
             var count = await players.CountAsync();
@@ -57,11 +57,18 @@ namespace Soccer.Controllers
         // POST: Players/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Age,Position,TeamId")] Players players)
+        public async Task<IActionResult> Create([Bind("Id,Name,BirthYear,Position,TeamId")] Players players)
         {
-            _context.Add(players);
-             await _context.SaveChangesAsync();
-             return RedirectToAction(nameof(Index));
+            if (DateTime.Now.Year - players.BirthYear <= 0)
+                ModelState.AddModelError("Age", "Возраст должен быть больше нуля");
+            if (ModelState.IsValid)
+            {
+                _context.Add(players);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            ViewData["TeamId"] = new SelectList(_context.Teams, "Id", "Name");
+            return View(players);
         }
 
         // GET: Players/Edit/5
@@ -84,31 +91,36 @@ namespace Soccer.Controllers
         // POST: Players/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Age,Position,TeamId")] Players players)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,BirthYear,Position,TeamId")] Players players)
         {
             if (id != players.Id)
             {
                 return NotFound();
             }
-
-            try
+            if (DateTime.Now.Year - players.BirthYear <= 0)
+                ModelState.AddModelError("Age", "Возраст должен быть больше нуля");
+            if (ModelState.IsValid)
             {
-                _context.Update(players);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PlayersExists(players.Id))
+                try
                 {
-                    return NotFound();
+                    _context.Update(players);
+                    await _context.SaveChangesAsync();
                 }
-                else
+                catch (DbUpdateConcurrencyException)
                 {
-                    throw;
+                    if (!PlayersExists(players.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
+                return RedirectToAction(nameof(Index));
             }
-            return RedirectToAction(nameof(Index));
-
+            ViewData["TeamId"] = new SelectList(_context.Teams, "Id", "Name", players.TeamId);
+            return View(players);
         }
 
         // GET: Players/Delete/5
@@ -144,14 +156,14 @@ namespace Soccer.Controllers
             {
                 _context.Players.Remove(players);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool PlayersExists(int id)
         {
-          return (_context.Players?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Players?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
