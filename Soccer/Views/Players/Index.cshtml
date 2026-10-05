@@ -1,54 +1,63 @@
 ﻿@model Soccer.Models.IndexViewModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Гравці";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr><th>Name</th><th>Age</th><th>Position</th><th>Club</th></tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model.Players) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @(DateTime.Now.Year - item.BirthYear)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Position)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Team!.Name)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
-<p>
-    @if (Model.PageViewModel.HasPreviousPage)
-    {
-        <a asp-action="Index"
-       asp-route-page="@(Model.PageViewModel.PageNumber - 1)" class="glyphicon glyphicon-chevron-left">
-            Назад
-        </a>
-    }
-    @if (Model.PageViewModel.HasNextPage)
-    {
-        <a asp-action="Index"
-       asp-route-page="@(Model.PageViewModel.PageNumber + 1)" class="glyphicon glyphicon-chevron-right">
-            Вперед
-        </a>
-    }
-</p>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Список гравців</h2>
+    <a asp-action="Create" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> + Додати нового гравця
+    </a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle shadow-sm rounded">
+        <thead class="table-dark">
+            <tr>
+                <th>Ім'я</th>
+                <th>Вік</th>
+                <th>Позиція</th>
+                <th>Клуб</th>
+                <th class="text-center">Дії</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Players)
+            {
+                <tr>
+                    <td class="fw-bold">@Html.DisplayFor(modelItem => item.Name)</td>
+                    <td>@(DateTime.Now.Year - item.BirthYear)</td>
+                    <td><span class="badge bg-secondary">@Html.DisplayFor(modelItem => item.Position)</span></td>
+                    <td>@Html.DisplayFor(modelItem => item.Team!.Name)</td>
+                    <td class="text-center">
+                        <div class="btn-group" role="group">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Редагувати</a>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Деталі</a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Видалити</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<nav aria-label="Пагінація">
+    <ul class="pagination justify-content-center mt-4">
+        <li class="page-item @(!Model.PageViewModel.HasPreviousPage ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" asp-route-page="@(Model.PageViewModel.PageNumber - 1)">
+                &laquo; Попередня
+            </a>
+        </li>
+        <li class="page-item active">
+            <span class="page-link">@Model.PageViewModel.PageNumber з @Model.PageViewModel.TotalPages</span>
+        </li>
+        <li class="page-item @(!Model.PageViewModel.HasNextPage ? "disabled" : "")">
+            <a class="page-link" asp-action="Index" asp-route-page="@(Model.PageViewModel.PageNumber + 1)">
+                Наступна &raquo;
+            </a>
+        </li>
+    </ul>
+</nav>

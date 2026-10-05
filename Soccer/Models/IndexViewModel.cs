@@ -2,9 +2,9 @@
 {
     public class IndexViewModel
     {
-        public IEnumerable<Players> Players { get; }
+        public IEnumerable<Player> Players { get; }
         public PageViewModel PageViewModel { get; }
-        public IndexViewModel(IEnumerable<Players> players, PageViewModel viewModel)
+        public IndexViewModel(IEnumerable<Player> players, PageViewModel viewModel)
         {
             Players = players;
             PageViewModel = viewModel;
